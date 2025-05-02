@@ -63,7 +63,7 @@ REDIS_URL=redis://user:password@host:port/database
 ```
 
 > ⚠️ **Important:**  
-> Make sure to set **"Build Variable?"** to `true` for at least `DATABASE_URL` and `REDIS_URL`.
+> Make sure to set **"Build Variable?"** to `true` for at least `DATABASE_URL`, `WORKER_MODE` and `REDIS_URL`.
 
 ---
 
@@ -100,7 +100,7 @@ REDIS_URL=redis://user:password@host:port/database
 ```
 
 > ⚠️ **Important:**  
-> Make sure to set **"Build Variable?"** to `true` for at least `DATABASE_URL` and `REDIS_URL`.
+> Make sure to set **"Build Variable?"** to `true` for at least `DATABASE_URL`, `WORKER_MODE` and `REDIS_URL`.
 
 
 ## 💡 Advice, Tips, Plans & More
