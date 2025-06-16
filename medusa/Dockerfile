@@ -2,7 +2,7 @@ FROM node:23 as builder
 
 WORKDIR /app/medusa
 
-COPY . . 
+COPY . .
 
 RUN rm -rf node_modules
 
@@ -27,6 +27,13 @@ ARG PORT
 ARG DATABASE_URL
 ARG REDIS_URL
 ARG BACKEND_URL
+ARG S3_FILE_URL
+ARG S3_ACCESS_KEY_ID
+ARG S3_SECRET_ACCESS_KEY
+ARG S3_REGION
+ARG S3_BUCKET
+ARG S3_ENDPOINT
+ARG S3_FORCE_PATH_STYLE
 
 RUN echo "${PORT}"
 
@@ -34,7 +41,7 @@ WORKDIR /app/medusa
 
 RUN mkdir .medusa
 
-# COPY package*.json .yarnrc.yml yarn.lock ./ 
+# COPY package*.json .yarnrc.yml yarn.lock ./
 
 # COPY medusa-config.ts .
 # COPY tsconfig.json .
@@ -48,7 +55,7 @@ WORKDIR /app/medusa/.medusa/server
 RUN yarn install --production
 
 
-# RUN medusa migrations run 
+# RUN medusa migrations run
 COPY migrations.sh /app/medusa/.medusa/server/migrations.sh
 RUN chmod +x /app/medusa/.medusa/server/migrations.sh
 RUN /app/medusa/.medusa/server/migrations.sh
