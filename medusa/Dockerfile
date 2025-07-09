@@ -34,6 +34,8 @@ ARG S3_REGION
 ARG S3_BUCKET
 ARG S3_ENDPOINT
 ARG S3_FORCE_PATH_STYLE
+ARG SHOPIFY_STORE_DOMAIN
+ARG SHOPIFY_ADMIN_TOKEN
 
 RUN echo "${PORT}"
 
@@ -43,7 +45,7 @@ RUN mkdir .medusa
 
 # COPY package*.json .yarnrc.yml yarn.lock ./
 
-# COPY medusa-config.ts .
+COPY medusa-config.ts .
 # COPY tsconfig.json .
 
 RUN apt-get update && apt-get install -y python3 python3-pip python-is-python3
