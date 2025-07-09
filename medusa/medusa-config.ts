@@ -47,7 +47,6 @@ module.exports = defineConfig({
     },
     {
       resolve: "@medusajs/medusa/file",
-
       options: {
         providers: [
           {
@@ -66,6 +65,19 @@ module.exports = defineConfig({
             },
           },
         ],
+      },
+    },
+  ],
+  plugins: [
+    {
+      resolve: "medusa-plugin-import-shopify",
+      options: {
+        storeDomain: process.env.SHOPIFY_STORE_DOMAIN,
+        adminToken: process.env.SHOPIFY_ADMIN_TOKEN,
+        AWS_REGION: process.env.S3_REGION,
+        AWS_ACCESS_KEY_ID: process.env.S3_ACCESS_KEY_ID,
+        AWS_SECRET_ACCESS_KEY: process.env.S3_SECRET_ACCESS_KEY,
+        AWS_S3_BUCKET: process.env.S3_BUCKET,
       },
     },
   ],
