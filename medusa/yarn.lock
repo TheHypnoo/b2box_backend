@@ -2672,6 +2672,11 @@
   resolved "https://registry.yarnpkg.com/@medusajs/fulfillment/-/fulfillment-2.8.7.tgz#7ed98907b81be90b2a925e7b444b9c950cda40b5"
   integrity sha512-kd2bRdTSuQXAI7erEwyD8i/qd6dHbbYGIu+mN1LQT08ePTETBO2SPUqPyc2OAijUPmUw0Dh9BpdGEfxrOSaG6w==
 
+"@medusajs/icons@2.8.6":
+  version "2.8.6"
+  resolved "https://registry.yarnpkg.com/@medusajs/icons/-/icons-2.8.6.tgz#ea817b7c7ea0280596c7e5f7b10868c8cc70bbdc"
+  integrity sha512-k3X1nA1L0eoR30tfAzCxTtpaE1h28K2qmuNyangOoBJObHkaD+gNIi3AG+2iLlmIrByzfCgzP0JvhzrtFFha4Q==
+
 "@medusajs/icons@2.8.7":
   version "2.8.7"
   resolved "https://registry.yarnpkg.com/@medusajs/icons/-/icons-2.8.7.tgz#ecf2a4eb64ccd6c522c986ecca4be2fae394bfdd"
@@ -2913,6 +2918,25 @@
   integrity sha512-8m/H9KkDUQz4YD+XkD/C63RfE/2elcdWf5G/KOK2QViTK0Jsd/Iw8Yy+T60pm0Lq/QQ925AfGH/Ji8UYNXjT8g==
   dependencies:
     bignumber.js "^9.1.2"
+
+"@medusajs/ui@4.0.16":
+  version "4.0.16"
+  resolved "https://registry.yarnpkg.com/@medusajs/ui/-/ui-4.0.16.tgz#f4273ebc117e9e45ca0639f2c9eafb5188e841cf"
+  integrity sha512-eAziJhmVM4mQPbAE1qXFKF3oTk+j32XFjXU8LEjuw5TN8gXuWHEu+5/aNxycV8N01ooO41Bms5rcGzPuj8kcGw==
+  dependencies:
+    "@medusajs/icons" "2.8.6"
+    "@tanstack/react-table" "8.20.5"
+    clsx "^1.2.1"
+    copy-to-clipboard "^3.3.3"
+    cva "1.0.0-beta.1"
+    prism-react-renderer "^2.0.6"
+    prismjs "^1.29.0"
+    radix-ui "1.1.2"
+    react-aria "^3.33.1"
+    react-currency-input-field "^3.6.11"
+    react-stately "^3.31.1"
+    sonner "^1.5.0"
+    tailwind-merge "^2.2.1"
 
 "@medusajs/ui@4.0.17":
   version "4.0.17"
@@ -9594,10 +9618,10 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==
 
-medusa-plugin-import-shopify@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/medusa-plugin-import-shopify/-/medusa-plugin-import-shopify-0.0.1.tgz#603b64daa2b7cfeabba7a54b5035ba3d10339b5a"
-  integrity sha512-yN54ZTsIk+ktUaiTylc2dkpatODSlNSPJ0goQVXqcSwDetlVuPsG02kDoCXGggf7yMPERyHn57Hs8Bbti62kgA==
+medusa-plugin-import-shopify@^0.0.2:
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/medusa-plugin-import-shopify/-/medusa-plugin-import-shopify-0.0.2.tgz#7aa74a689f93500d1ed742b32473f12bcc9ef809"
+  integrity sha512-tBK1AOGIPnctcyUjSa1yNX3MY4YIjYe3bRdDkE6rnKQlyeIkFWmJQq/Cu9LwPlJL81s59TM25ZLr7D5B2pn0vA==
   dependencies:
     "@aws-sdk/client-s3" "^3.842.0"
     "@aws-sdk/lib-storage" "^3.842.0"

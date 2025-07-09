@@ -33,7 +33,7 @@
     "@mikro-orm/migrations": "6.4.3",
     "@mikro-orm/postgresql": "6.4.3",
     "awilix": "8.0.1",
-    "medusa-plugin-import-shopify": "^0.0.1",
+    "medusa-plugin-import-shopify": "^0.0.2",
     "pg": "^8.16.0"
   },
   "devDependencies": {
