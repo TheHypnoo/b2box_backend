@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
 import {
   Input,
@@ -11,53 +11,48 @@ import {
   IconButton,
   Badge,
   Alert,
-  Select,
 } from "@medusajs/ui";
-import { EllipsisHorizontal, Plus, Trash } from "@medusajs/icons";
+import { EllipsisHorizontal } from "@medusajs/icons";
 import { sdk } from "../lib/sdk";
 import {
   DetailWidgetProps,
   AdminProductVariant,
   AdminStoreCurrency,
 } from "@medusajs/framework/types";
-
-interface PricingPrice {
-  id: string;
-  amount: number;
-  currency_code: string;
-  min_quantity?: number;
-  max_quantity?: number;
-  price_set_id: string;
-}
-
-interface PricingData {
-  priceSetId: string;
-  prices: PricingPrice[];
-}
-
-interface FormPrice {
-  amount: number;
-  currency_code: string;
-  min_quantity?: number;
-  max_quantity?: number;
-}
-
-const SectionRow = ({ title, value }: { title: string; value: string }) => (
-  <div className="flex items-center justify-between px-6 py-4">
-    <Text size="small" color="secondary">
-      {title}
-    </Text>
-    <Text size="small">{value || "—"}</Text>
-  </div>
-);
+import SectionRow from "../components/SectionRow";
+import { Packaging, Pricing, PricingData } from "../types";
 
 const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   const [currencies, setCurrencies] = useState<AdminStoreCurrency[]>([]);
   const [pricingData, setPricingData] = useState<PricingData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [formPrices, setFormPrices] = useState<FormPrice[]>([]);
+
+  const [formData, setFormData] = useState<Pricing>(() => {
+    const pricing = data.metadata?.pricing as Pricing | undefined;
+    const packaging = data.metadata?.packaging as Packaging | undefined;
+
+    return {
+      purchasePrices: {
+        tier1: (pricing?.purchasePrices?.tier1 as number) ?? null,
+        tier2: (pricing?.purchasePrices?.tier2 as number) ?? null,
+        tier3: (pricing?.purchasePrices?.tier3 as number) ?? null,
+      },
+      minQuantities: {
+        tier1: (pricing?.minQuantities?.tier1 as number) ?? 50,
+        tier2: (pricing?.minQuantities?.tier2 as number) ?? 100,
+        tier3: (pricing?.minQuantities?.tier3 as number) ?? 150,
+      },
+      margins: pricing?.margins || {},
+      includePackaging: Boolean(packaging?.status),
+    } as Pricing;
+  });
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  const packaging = useMemo(() => {
+    return data.metadata?.packaging as Packaging | undefined;
+  }, [data.metadata]);
 
   // Load currencies and current pricing data
   useEffect(() => {
@@ -68,7 +63,9 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
 
         // Load available currencies
         const storeResponse = await sdk.admin.store.list();
-        setCurrencies(storeResponse.stores?.[0]?.supported_currencies || []);
+        const availableCurrencies =
+          storeResponse.stores?.[0]?.supported_currencies || [];
+        setCurrencies(availableCurrencies);
 
         // Load current pricing data
         const pricingResponse = (await sdk.client.fetch(
@@ -83,6 +80,24 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         } else {
           setPricingData(null);
         }
+
+        // Initialize margins for currencies that don't exist in formData yet
+        const currentMargins = formData.margins;
+        availableCurrencies.forEach((currency) => {
+          if (!currentMargins[currency.currency_code]) {
+            setFormData((prev) => ({
+              ...prev,
+              margins: {
+                ...prev.margins,
+                [currency.currency_code]: {
+                  tier1: null,
+                  tier2: null,
+                  tier3: null,
+                },
+              },
+            }));
+          }
+        });
       } catch (error) {
         console.error("Error loading pricing data:", error);
         setError("Error loading pricing data");
@@ -92,103 +107,144 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
     };
 
     loadData();
-  }, [data.id]);
+  }, [data.id, data.metadata]);
 
   const handleEdit = () => {
-    // Initialize form with current prices
-    const currentPrices: FormPrice[] =
-      pricingData?.prices.map((price) => ({
-        amount: price.amount,
-        currency_code: price.currency_code,
-        min_quantity: price.min_quantity,
-        max_quantity: price.max_quantity,
-      })) || [];
-
-    setFormPrices(currentPrices);
     setIsDrawerOpen(true);
   };
 
-  const addPrice = (e?: React.MouseEvent) => {
-    // Prevent form submission if this is called from a button click
-    if (e) {
-      e.preventDefault();
-      e.stopPropagation();
-    }
-
-    const newCurrency =
-      currencies.find(
-        (c) => !formPrices.some((p) => p.currency_code === c.currency_code)
-      )?.currency_code ||
-      currencies[0]?.currency_code ||
-      "eur";
-
-    setFormPrices((prev) => [
+  // 3. Update handlers for purchase price, min quantity, and margin
+  const updatePurchasePrice = (tier: string, amount: number | null) => {
+    setFormData((prev) => ({
       ...prev,
-      {
-        amount: 0,
-        currency_code: newCurrency,
-        min_quantity: undefined,
-        max_quantity: undefined,
+      purchasePrices: {
+        ...prev.purchasePrices,
+        [tier]: amount,
       },
-    ]);
+    }));
   };
 
-  const removePrice = (index: number) => {
-    setFormPrices((prev) => prev.filter((_, i) => i !== index));
+  const updateMinQuantity = (tier: string, quantity: number | null) => {
+    setFormData((prev) => ({
+      ...prev,
+      minQuantities: {
+        ...prev.minQuantities,
+        [tier]: quantity,
+      },
+    }));
   };
 
-  const updatePrice = (index: number, field: keyof FormPrice, value: any) => {
-    setFormPrices((prev) =>
-      prev.map((price, i) =>
-        i === index ? { ...price, [field]: value } : price
-      )
-    );
+  const updateMargin = (
+    currency: string,
+    tier: number,
+    margin: number | null
+  ) => {
+    setFormData((prev) => ({
+      ...prev,
+      margins: {
+        ...prev.margins,
+        [currency]: {
+          ...prev.margins[currency],
+          [`tier${tier}`]: margin,
+        },
+      },
+    }));
   };
 
+  // 4. Sale price calculation
+  const calculateSalePrice = (
+    purchasePrice: number,
+    margin: number,
+    packagingPrice: number,
+    includePackaging: boolean
+  ) => {
+    const totalCost = purchasePrice + (includePackaging ? packagingPrice : 0);
+    return totalCost * (1 + margin / 100);
+  };
+
+  // 5. Update handleSubmit to save all pricing data in metadata.pricing
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
-      // Filter out prices with zero amount
-      const validPrices = formPrices.filter((price) => price.amount > 0);
-
-      // Convert prices to the format expected by the API
-      const apiPrices = validPrices.map((price) => ({
-        amount: price.amount,
-        currency_code: price.currency_code,
-        min_quantity: price.min_quantity || null,
-        max_quantity: price.max_quantity || null,
-      }));
-
-      const response = (await sdk.client.fetch(`/admin/pricing/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      // Save all pricing data in metadata.pricing
+      await sdk.admin.product.updateVariant(data.product_id!, data.id, {
+        metadata: {
+          ...data.metadata,
+          pricing: {
+            purchasePrices: formData.purchasePrices,
+            minQuantities: formData.minQuantities,
+            margins: formData.margins,
+            includePackaging: formData.includePackaging,
+          },
         },
-        body: {
-          variantId: data.id,
-          priceSetId: pricingData?.priceSetId,
-          prices: apiPrices,
-        },
-      })) as any;
+      });
+      // Calculate and save sale prices
+      const salePrices = [];
+      for (const currency of currencies) {
+        const currencyCode = currency.currency_code;
+        const marginObj = formData.margins[currencyCode] || {};
+        for (let tier = 1; tier <= 3; tier++) {
+          const purchasePrice =
+            formData.purchasePrices[
+              `tier${tier}` as keyof typeof formData.purchasePrices
+            ];
+          const margin =
+            marginObj[`tier${tier}` as keyof typeof marginObj] || 0;
 
-      if (response?.result?.data) {
-        // Reload pricing data
-        const updatedPricingResponse = (await sdk.client.fetch(
-          `/admin/pricing/?variantId=${data.id}`
-        )) as any;
+          if (purchasePrice !== null && purchasePrice > 0) {
+            const salePrice = calculateSalePrice(
+              purchasePrice,
+              margin,
+              (packaging?.price as number) || 0,
+              formData.includePackaging
+            );
 
-        setPricingData({
-          priceSetId: updatedPricingResponse.priceSetId,
-          prices: updatedPricingResponse.prices || [],
-        });
+            const minQty =
+              formData.minQuantities[
+                `tier${tier}` as keyof typeof formData.minQuantities
+              ];
 
-        setIsDrawerOpen(false);
-        setError(null);
+            const maxQty =
+              tier < 3
+                ? (formData.minQuantities?.[
+                    `tier${tier + 1}` as keyof typeof formData.minQuantities
+                  ] ?? 0) - 1 || null
+                : null;
+
+            salePrices.push({
+              amount: Math.round(salePrice * 100) / 100,
+              currency_code: currencyCode,
+              min_quantity: minQty,
+              max_quantity: maxQty,
+            });
+          }
+        }
       }
+      // Save sale prices to pricing system
+      if (salePrices.length > 0) {
+        await sdk.client.fetch(`/admin/pricing/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: {
+            variantId: data.id,
+            priceSetId: pricingData?.priceSetId,
+            prices: salePrices,
+          },
+        });
+      }
+      // Reload pricing data
+      const updatedPricingResponse = (await sdk.client.fetch(
+        `/admin/pricing/?variantId=${data.id}`
+      )) as any;
+      setPricingData({
+        priceSetId: updatedPricingResponse.priceSetId,
+        prices: updatedPricingResponse.prices || [],
+      });
+      setIsDrawerOpen(false);
+      setError(null);
     } catch (error) {
-      console.error("Error updating prices:", error);
-      setError("Error updating prices");
+      console.error("Error updating pricing:", error);
+      setError("Error updating pricing");
     }
   };
 
@@ -225,205 +281,252 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         </div>
       )}
 
-      {pricingData ? (
-        <div className="px-6 py-4">
-          {pricingData.prices.length > 0 ? (
-            pricingData.prices.map((price) => (
-              <div key={price.id} className="border rounded-lg p-4 mb-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge>{price.currency_code.toUpperCase()}</Badge>
-                </div>
-                <SectionRow
-                  title="Amount"
-                  value={`${price.amount} ${price.currency_code.toUpperCase()}`}
-                />
-                {price.min_quantity && (
-                  <SectionRow
-                    title="Min Quantity"
-                    value={price.min_quantity.toString()}
-                  />
-                )}
-                {price.max_quantity && (
-                  <SectionRow
-                    title="Max Quantity"
-                    value={price.max_quantity.toString()}
-                  />
-                )}
-              </div>
-            ))
-          ) : (
-            <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
-              <Heading level="h3" className="mb-2 text-gray-600">
-                No Pricing Configured
-              </Heading>
-              <Text size="small" color="secondary" className="mb-4 max-w-sm">
-                This product variant doesn't have any pricing set up yet. Add
-                pricing to make it available for purchase.
-              </Text>
-              <Button
-                variant="secondary"
-                size="small"
-                onClick={handleEdit}
-                className="flex items-center gap-2"
-              >
-                <Plus />
-                Configure Pricing
-              </Button>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="px-6 py-4">
-          <div className="flex flex-col items-center justify-center py-6 px-4 text-center">
-            <Text size="small" color="secondary" className="mb-3">
-              No pricing data available
+      {/* Purchase Prices Section */}
+      <div className="px-6 py-4">
+        {!formData.includePackaging && (packaging?.price as number) > 0 && (
+          <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <Text size="small" className="text-gray-600">
+              📦 Packaging price: ¥{packaging?.price as number} CNY (included in
+              calculations)
             </Text>
-            <Button
-              variant="secondary"
-              size="small"
-              onClick={handleEdit}
-              className="flex items-center gap-2"
-            >
-              <Plus />
-              Set Up Pricing
-            </Button>
           </div>
-        </div>
-      )}
+        )}
+        {Object.entries(formData.purchasePrices).map(([tier, amount]) => {
+          const packagingPrice = (packaging?.price as number) || 0;
+          const totalWithPackaging = (amount || 0) + packagingPrice;
+
+          return (
+            <div key={tier} className="border rounded-lg p-4 mb-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Badge>{tier.toUpperCase().replace("TIER", "TIER ")}</Badge>
+                <Text size="small" color="secondary">
+                  min:{" "}
+                  {
+                    formData.minQuantities[
+                      tier as keyof typeof formData.minQuantities
+                    ]
+                  }
+                </Text>
+                {tier !== "tier3" &&
+                  (() => {
+                    const nextTier = `tier${
+                      parseInt(tier.replace("tier", "")) + 1
+                    }` as keyof typeof formData.minQuantities;
+                    const maxQty = formData.minQuantities?.[nextTier];
+                    return maxQty ? (
+                      <Text size="small" color="secondary">
+                        • max: {maxQty - 1}
+                      </Text>
+                    ) : null;
+                  })()}
+              </div>
+              <SectionRow
+                title="Base Purchase Price"
+                value={amount !== null ? `¥${amount} CNY` : "—"}
+              />
+              {!formData.includePackaging && packagingPrice > 0 && (
+                <SectionRow
+                  title="Total (Base + Packaging)"
+                  value={`¥${totalWithPackaging} CNY`}
+                />
+              )}
+
+              {/* Sale Prices by Currency */}
+              {amount !== null && (
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge size="small">Sale Prices</Badge>
+                    <Text size="small" color="secondary">
+                      Calculated with margins
+                    </Text>
+                  </div>
+                  {currencies.map((storeCurrency) => {
+                    const currencyCode = storeCurrency.currency_code;
+                    const margin =
+                      formData.margins[currencyCode]?.[
+                        tier as keyof {
+                          tier1: number | null;
+                          tier2: number | null;
+                          tier3: number | null;
+                        }
+                      ] || null;
+
+                    if (margin === null) return null;
+
+                    const salePrice = calculateSalePrice(
+                      amount,
+                      margin,
+                      packagingPrice,
+                      formData.includePackaging
+                    );
+
+                    return (
+                      <div key={currencyCode} className="mb-2 last:mb-0">
+                        <div className="flex justify-between items-center py-2">
+                          <div className="flex items-center gap-2">
+                            <Text size="small" className="font-medium">
+                              {currencyCode.toUpperCase()}
+                            </Text>
+                            <Text size="xsmall" color="secondary">
+                              ({margin}% margin)
+                            </Text>
+                          </div>
+                          <div className="text-right">
+                            <Text size="small" className="font-semibold">
+                              {salePrice.toFixed(2)}{" "}
+                              {storeCurrency.currency.symbol}
+                            </Text>
+                            <Text size="xsmall" color="secondary">
+                              per unit
+                            </Text>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
 
       {/* Drawer for editing */}
       <Drawer open={isDrawerOpen} onOpenChange={handleCloseDrawer}>
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>Edit Pricing</Drawer.Title>
+            <Drawer.Title>Edit Pricing Configuration</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body style={{ overflowY: "auto" }}>
             <form onSubmit={handleSubmit}>
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 24 }}
               >
-                {formPrices.map((price, index) => (
-                  <div key={index} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <Badge>{price.currency_code.toUpperCase()}</Badge>
-                      <IconButton
-                        size="small"
-                        variant="transparent"
-                        onClick={() => removePrice(index)}
-                      >
-                        <Trash />
-                      </IconButton>
-                    </div>
+                {/* Purchase Prices */}
+                <div>
+                  <Heading level="h3" className="mb-4">
+                    Purchase Prices (CNY)
+                  </Heading>
+                  {Object.entries(formData.purchasePrices).map(
+                    ([tier, amount]) => {
+                      return (
+                        <div key={tier} className="border rounded-lg p-4 mb-4">
+                          <div className="flex items-center justify-between mb-4">
+                            <Badge>
+                              {tier.toUpperCase().replace("TIER", "TIER ")}
+                            </Badge>
+                          </div>
+                          <div
+                            style={{
+                              display: "flex",
+                              flexDirection: "column",
+                              gap: 16,
+                            }}
+                          >
+                            <div>
+                              <Label>Base Purchase Price (CNY)</Label>
+                              <Input
+                                type="number"
+                                value={amount || ""}
+                                onChange={(e) =>
+                                  updatePurchasePrice(
+                                    tier,
+                                    Number(e.target.value) || null
+                                  )
+                                }
+                                min="0"
+                                step="0.01"
+                                placeholder="Enter purchase price"
+                              />
+                            </div>
+                            <div>
+                              <Label>Minimum Quantity</Label>
+                              <Input
+                                type="number"
+                                value={
+                                  formData.minQuantities?.[
+                                    `${tier}` as keyof typeof formData.minQuantities
+                                  ] ?? ""
+                                }
+                                onChange={(e) => {
+                                  updateMinQuantity(
+                                    tier,
+                                    e.target.value === ""
+                                      ? null
+                                      : parseInt(e.target.value) || null
+                                  );
+                                }}
+                                min="1"
+                                placeholder="Minimum quantity"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
 
+                {/* Margins Configuration */}
+                <div>
+                  <Heading level="h3" className="mb-4">
+                    Margins (%)
+                  </Heading>
+                  {currencies.map((currency) => (
                     <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 16,
-                      }}
+                      key={currency.currency_code}
+                      className="border rounded-lg p-4 mb-4"
                     >
-                      <div>
-                        <Label>Amount</Label>
-                        <Input
-                          type="number"
-                          value={price.amount}
-                          onChange={(e) =>
-                            updatePrice(index, "amount", e.target.value)
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
+                      <Badge className="mb-3">
+                        {currency.currency_code.toUpperCase()}
+                      </Badge>
+                      {[1, 2, 3].map((tier) => {
+                        const margin =
+                          formData.margins[currency.currency_code]?.[
+                            `tier${tier}` as keyof {
+                              tier1: number | null;
+                              tier2: number | null;
+                              tier3: number | null;
                             }
-                          }}
-                          required
-                          placeholder="0.00"
-                        />
-                      </div>
-
-                      <div>
-                        <Label>Currency</Label>
-                        <Select
-                          value={price.currency_code}
-                          onValueChange={(value) =>
-                            updatePrice(index, "currency_code", value)
-                          }
-                        >
-                          <Select.Trigger>
-                            <Select.Value placeholder="Select currency" />
-                          </Select.Trigger>
-                          <Select.Content>
-                            {currencies.map((currency) => (
-                              <Select.Item
-                                key={currency.currency_code}
-                                value={currency.currency_code}
-                              >
-                                {currency.currency_code.toUpperCase()}
-                              </Select.Item>
-                            ))}
-                          </Select.Content>
-                        </Select>
-                      </div>
-
-                      <div>
-                        <Label>Min Quantity (optional)</Label>
-                        <Input
-                          type="number"
-                          value={price.min_quantity || ""}
-                          onChange={(e) =>
-                            updatePrice(
-                              index,
-                              "min_quantity",
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                            }
-                          }}
-                          min="1"
-                          placeholder="Leave empty for no minimum"
-                        />
-                      </div>
-
-                      <div>
-                        <Label>Max Quantity (optional)</Label>
-                        <Input
-                          type="number"
-                          value={price.max_quantity || ""}
-                          onChange={(e) =>
-                            updatePrice(
-                              index,
-                              "max_quantity",
-                              e.target.value
-                                ? parseInt(e.target.value)
-                                : undefined
-                            )
-                          }
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") {
-                              e.preventDefault();
-                            }
-                          }}
-                          min="1"
-                          placeholder="Leave empty for no maximum"
-                        />
-                      </div>
+                          ] || null;
+                        const minQty =
+                          formData.minQuantities[
+                            `tier${tier}` as keyof typeof formData.minQuantities
+                          ];
+                        return (
+                          <div key={tier} className="mb-4">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Text size="small">
+                                Tier {tier} (Min: {minQty}+ units)
+                              </Text>
+                            </div>
+                            <div>
+                              <Label>
+                                Margin ({currency.currency_code.toUpperCase()})
+                              </Label>
+                              <Input
+                                type="number"
+                                value={margin ?? ""}
+                                onChange={(e) => {
+                                  updateMargin(
+                                    currency.currency_code,
+                                    tier,
+                                    e.target.value === ""
+                                      ? null
+                                      : parseFloat(e.target.value) || null
+                                  );
+                                }}
+                                min="0"
+                                step="0.01"
+                                placeholder="25"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                ))}
-
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={(e) => addPrice(e)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus />
-                  Add Price
-                </Button>
+                  ))}
+                </div>
               </div>
             </form>
           </Drawer.Body>
@@ -441,7 +544,6 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   );
 };
 
-// The widget's configurations
 export const config = defineWidgetConfig({
   zone: "product_variant.details.after",
 });

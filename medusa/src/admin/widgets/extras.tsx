@@ -1,26 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { defineWidgetConfig } from "@medusajs/admin-sdk";
-import { Switch, Heading, Text, Container } from "@medusajs/ui";
+import { Switch, Heading, Container } from "@medusajs/ui";
 import { sdk } from "../lib/sdk";
 import {
   DetailWidgetProps,
   AdminProductVariant,
 } from "@medusajs/framework/types";
-
-const SectionRow = ({
-  title,
-  value,
-}: {
-  title: string;
-  value: React.ReactNode;
-}) => (
-  <div className="flex items-center justify-between px-6 py-4">
-    <Text size="small" color="secondary">
-      {title}
-    </Text>
-    <div>{value}</div>
-  </div>
-);
+import SectionRow from "../components/SectionRow";
 
 const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   const [hasBattery, setHasBattery] = useState(
@@ -42,7 +28,7 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         },
       });
     } catch (error) {
-      console.error("Error al actualizar el estado de batería:", error);
+      console.error("Error updating battery state:", error);
     }
   };
 
@@ -58,7 +44,7 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         },
       });
     } catch (error) {
-      console.error("Error al actualizar el estado de ropa:", error);
+      console.error("Error updating clothing state:", error);
     }
   };
 
@@ -68,13 +54,13 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         <Heading level="h2">Extras</Heading>
       </div>
       <SectionRow
-        title="Batería"
+        title="Battery"
         value={
           <Switch checked={hasBattery} onCheckedChange={handleBatteryToggle} />
         }
       />
       <SectionRow
-        title="Ropa"
+        title="Clothing"
         value={
           <Switch checked={isClothing} onCheckedChange={handleClothingToggle} />
         }
@@ -83,9 +69,8 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   );
 };
 
-// The widget's configurations
 export const config = defineWidgetConfig({
-  zone: "product_variant.details.side.after",
+  zone: "product_variant.details.side.before",
 });
 
 export default ExtrasWidget;

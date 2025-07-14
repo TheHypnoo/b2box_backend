@@ -6,7 +6,6 @@ import {
   Button,
   Drawer,
   Heading,
-  Text,
   Container,
   IconButton,
 } from "@medusajs/ui";
@@ -16,47 +15,40 @@ import {
   DetailWidgetProps,
   AdminProductVariant,
 } from "@medusajs/framework/types";
+import SectionRow from "../components/SectionRow";
 
 interface VariantAttributes {
-  box_width: string;
-  box_length: string;
-  box_height: string;
-  box_weight: string;
+  width: string;
+  length: string;
+  height: string;
+  weight: string;
 }
-
-const SectionRow = ({ title, value }: { title: string; value: string }) => (
-  <div className="flex items-center justify-between px-6 py-4">
-    <Text size="small" color="secondary">
-      {title}
-    </Text>
-    <Text size="small">{value || "—"}</Text>
-  </div>
-);
 
 const AttributeVariantsWidget = ({
   data,
 }: DetailWidgetProps<AdminProductVariant>) => {
+  console.log(data.metadata);
   const [attributes, setAttributes] = useState<VariantAttributes>({
-    box_width: (data.metadata?.box_width as string | undefined) || "-",
-    box_length: (data.metadata?.box_length as string | undefined) || "-",
-    box_height: (data.metadata?.box_height as string | undefined) || "-",
-    box_weight: (data.metadata?.box_weight as string | undefined) || "-",
+    width: (data.metadata?.box as any)?.width || "-",
+    length: (data.metadata?.box as any)?.length || "-",
+    height: (data.metadata?.box as any)?.height || "-",
+    weight: (data.metadata?.box as any)?.weight || "-",
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formData, setFormData] = useState({
-    box_width: "",
-    box_length: "",
-    box_height: "",
-    box_weight: "",
+    width: "",
+    length: "",
+    height: "",
+    weight: "",
   });
 
   const handleEdit = () => {
     setFormData({
-      box_width: attributes.box_width,
-      box_length: attributes.box_length,
-      box_height: attributes.box_height,
-      box_weight: attributes.box_weight,
+      width: attributes.width,
+      length: attributes.length,
+      height: attributes.height,
+      weight: attributes.weight,
     });
     setIsDrawerOpen(true);
   };
@@ -73,7 +65,9 @@ const AttributeVariantsWidget = ({
     sdk.admin.product.updateVariant(data.product_id, data.id, {
       metadata: {
         ...data.metadata,
-        ...formData,
+        box: {
+          ...formData,
+        },
       },
     });
     setIsDrawerOpen(false);
@@ -86,21 +80,21 @@ const AttributeVariantsWidget = ({
   return (
     <Container className="divide-y p-0">
       <div className="flex items-center justify-between px-6 py-4">
-        <Heading level="h2">Dimensiones de la Caja</Heading>
+        <Heading level="h2">Box Dimensions</Heading>
         <IconButton size="small" variant={"transparent"} onClick={handleEdit}>
           <EllipsisHorizontal />
         </IconButton>
       </div>
-      <SectionRow title="Ancho" value={`${attributes.box_width} cm`} />
-      <SectionRow title="Largo" value={`${attributes.box_length} cm`} />
-      <SectionRow title="Altura" value={`${attributes.box_height} cm`} />
-      <SectionRow title="Peso" value={`${attributes.box_weight} kg`} />
+      <SectionRow title="Width" value={`${attributes.width} cm`} />
+      <SectionRow title="Length" value={`${attributes.length} cm`} />
+      <SectionRow title="Height" value={`${attributes.height} cm`} />
+      <SectionRow title="Weight" value={`${attributes.weight} kg`} />
 
       {/* Drawer for editing */}
       <Drawer open={isDrawerOpen} onOpenChange={handleCloseDrawer}>
         <Drawer.Content>
           <Drawer.Header>
-            <Drawer.Title>Editar Dimensiones de la Caja</Drawer.Title>
+            <Drawer.Title>Edit Box Dimensions</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body>
             <form onSubmit={handleSubmit}>
@@ -108,59 +102,59 @@ const AttributeVariantsWidget = ({
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
               >
                 <div>
-                  <Label htmlFor="width">Ancho (cm)</Label>
+                  <Label htmlFor="width">Width (cm)</Label>
                   <Input
                     id="width"
                     type="number"
-                    name="box_width"
-                    value={formData.box_width}
+                    name="width"
+                    value={formData.width}
                     onChange={handleChange}
                     min="0"
                     step="any"
                     required
-                    placeholder="Introduce el ancho"
+                    placeholder="Enter width"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="length">Largo (cm)</Label>
+                  <Label htmlFor="length">Length (cm)</Label>
                   <Input
                     id="length"
                     type="number"
-                    name="box_length"
-                    value={formData.box_length}
+                    name="length"
+                    value={formData.length}
                     onChange={handleChange}
                     min="0"
                     step="any"
                     required
-                    placeholder="Introduce el largo"
+                    placeholder="Enter length"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="height">Altura (cm)</Label>
+                  <Label htmlFor="height">Height (cm)</Label>
                   <Input
                     id="height"
                     type="number"
-                    name="box_height"
-                    value={formData.box_height}
+                    name="height"
+                    value={formData.height}
                     onChange={handleChange}
                     min="0"
                     step="any"
                     required
-                    placeholder="Introduce la altura"
+                    placeholder="Enter height"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="weight">Peso (kg)</Label>
+                  <Label htmlFor="weight">Weight (kg)</Label>
                   <Input
                     id="weight"
                     type="number"
-                    name="box_weight"
-                    value={formData.box_weight}
+                    name="weight"
+                    value={formData.weight}
                     onChange={handleChange}
                     min="0"
                     step="any"
                     required
-                    placeholder="Introduce el peso"
+                    placeholder="Enter weight"
                   />
                 </div>
               </div>
@@ -168,10 +162,10 @@ const AttributeVariantsWidget = ({
           </Drawer.Body>
           <Drawer.Footer>
             <Button variant="secondary" onClick={handleCloseDrawer}>
-              Cancelar
+              Cancel
             </Button>
             <Button variant="primary" onClick={handleSubmit}>
-              Guardar cambios
+              Save changes
             </Button>
           </Drawer.Footer>
         </Drawer.Content>
@@ -180,9 +174,8 @@ const AttributeVariantsWidget = ({
   );
 };
 
-// The widget's configurations
 export const config = defineWidgetConfig({
-  zone: "product_variant.details.side.after",
+  zone: "product_variant.details.side.before",
 });
 
 export default AttributeVariantsWidget;

@@ -9618,10 +9618,10 @@ media-typer@0.3.0:
   resolved "https://registry.yarnpkg.com/media-typer/-/media-typer-0.3.0.tgz#8710d7af0aa626f8fffa1ce00168545263255748"
   integrity sha512-dq+qelQ9akHpcOl/gUVRTxVIOkAJ1wR3QAvb4RsVjS8oVoFjDGTc679wJYmUmknUF5HwMLOgb5O+a3KxfWapPQ==
 
-medusa-plugin-import-shopify@^0.0.2:
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/medusa-plugin-import-shopify/-/medusa-plugin-import-shopify-0.0.2.tgz#7aa74a689f93500d1ed742b32473f12bcc9ef809"
-  integrity sha512-tBK1AOGIPnctcyUjSa1yNX3MY4YIjYe3bRdDkE6rnKQlyeIkFWmJQq/Cu9LwPlJL81s59TM25ZLr7D5B2pn0vA==
+medusa-plugin-import-shopify@^0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/medusa-plugin-import-shopify/-/medusa-plugin-import-shopify-0.0.3.tgz#3249f62e5502708458f374829e5cca7e225f8dec"
+  integrity sha512-wrbqT4dfYrb5eea2dD+rzsk3qX4qsHymI4XSrNsQMPlf9yKlPpzpEy9AfaTRDUDiCjV4cUggyTfm9Y5+0BdxIg==
   dependencies:
     "@aws-sdk/client-s3" "^3.842.0"
     "@aws-sdk/lib-storage" "^3.842.0"

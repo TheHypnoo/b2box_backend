@@ -80,5 +80,13 @@ module.exports = defineConfig({
         AWS_S3_BUCKET: process.env.S3_BUCKET,
       },
     },
+    {
+      resolve: "medusa-variant-images",
+      options: {},
+    },
+    {
+      resolve: "medusa-backup",
+      options: {},
+    },
   ],
 });
