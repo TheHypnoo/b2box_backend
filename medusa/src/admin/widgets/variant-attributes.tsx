@@ -130,8 +130,8 @@ const VariantAttributesWidget = ({
           <EllipsisHorizontal />
         </IconButton>
       </div>
-      <SectionRow title="Width" value={`${variantData.width} cm`} />
       <SectionRow title="Length" value={`${variantData.length} cm`} />
+      <SectionRow title="Width" value={`${variantData.width} cm`} />
       <SectionRow title="Height" value={`${variantData.height} cm`} />
       <SectionRow title="Weight" value={`${variantData.weight} kg`} />
 

@@ -38,9 +38,9 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         tier3: (pricing?.purchasePrices?.tier3 as number) ?? null,
       },
       minQuantities: {
-        tier1: (pricing?.minQuantities?.tier1 as number) ?? 50,
-        tier2: (pricing?.minQuantities?.tier2 as number) ?? 100,
-        tier3: (pricing?.minQuantities?.tier3 as number) ?? 150,
+        tier1: (pricing?.minQuantities?.tier1 as number) ?? null,
+        tier2: (pricing?.minQuantities?.tier2 as number) ?? null,
+        tier3: (pricing?.minQuantities?.tier3 as number) ?? null,
       },
       margins: pricing?.margins || {},
       includePackaging: Boolean(packaging?.status),
@@ -301,11 +301,13 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                 <Badge>{tier.toUpperCase().replace("TIER", "TIER ")}</Badge>
                 <Text size="small" color="secondary">
                   min:{" "}
-                  {
-                    formData.minQuantities[
-                      tier as keyof typeof formData.minQuantities
-                    ]
-                  }
+                  {formData.minQuantities[
+                    tier as keyof typeof formData.minQuantities
+                  ] === null
+                    ? "—"
+                    : formData.minQuantities[
+                        tier as keyof typeof formData.minQuantities
+                      ]}
                 </Text>
                 {tier !== "tier3" &&
                   (() => {

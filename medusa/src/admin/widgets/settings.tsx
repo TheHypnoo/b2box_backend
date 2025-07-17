@@ -22,6 +22,9 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
   const [isVerified, setIsVerified] = useState(
     Boolean(data.metadata?.b2box_verified)
   );
+  const [isVideoVerified, setIsVideoVerified] = useState(
+    Boolean(data.metadata?.b2box_verified_video)
+  );
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -74,6 +77,22 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     }
   };
 
+  const handleVideoToggle = async (checked: boolean) => {
+    if (!data.id) return;
+    setIsVideoVerified(checked);
+
+    try {
+      await sdk.admin.product.update(data.id, {
+        metadata: {
+          ...data.metadata,
+          b2box_verified_video: checked,
+        },
+      });
+    } catch (error) {
+      console.error("Error updating video verification state:", error);
+    }
+  };
+
   const handleCloseDrawer = () => {
     setIsDrawerOpen(false);
   };
@@ -87,10 +106,8 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
         </IconButton>
       </div>
       <SectionRow title="BX Code" value={bxCode} />
-      <SectionRow
-        title="Verified"
-        value={<Switch checked={isVerified} onCheckedChange={handleToggle} />}
-      />
+      <SectionRow title="Verified Product" value={<Switch checked={isVerified} onCheckedChange={handleToggle} />} />
+      <SectionRow title="Verified Video" value={<Switch checked={isVideoVerified} onCheckedChange={handleVideoToggle} />} />
 
       {/* Drawer for editing BX Code */}
       <Drawer open={isDrawerOpen} onOpenChange={handleCloseDrawer}>

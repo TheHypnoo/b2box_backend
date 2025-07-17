@@ -85,8 +85,8 @@ const AttributeVariantsWidget = ({
           <EllipsisHorizontal />
         </IconButton>
       </div>
-      <SectionRow title="Width" value={`${attributes.width} cm`} />
       <SectionRow title="Length" value={`${attributes.length} cm`} />
+      <SectionRow title="Width" value={`${attributes.width} cm`} />
       <SectionRow title="Height" value={`${attributes.height} cm`} />
       <SectionRow title="Weight" value={`${attributes.weight} kg`} />
 

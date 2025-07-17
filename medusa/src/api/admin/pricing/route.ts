@@ -25,7 +25,6 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
 };
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
-  //TODO: POST - CREATE OR UPDATE PRICING
   const { variantId, priceSetId, prices } = req.body as {
     variantId: string;
     priceSetId?: string;
@@ -39,8 +38,6 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     fields: ["price_set.*"],
     filters: { id: [variantId] },
   });
-
-  console.log(variants[0].price_set?.id);
 
   if (!variants[0]?.price_set?.id) {
     return res.status(404).json({ message: "Price set not found for variant" });
