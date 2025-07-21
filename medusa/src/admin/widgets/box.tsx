@@ -27,7 +27,6 @@ interface VariantAttributes {
 const AttributeVariantsWidget = ({
   data,
 }: DetailWidgetProps<AdminProductVariant>) => {
-  console.log(data.metadata);
   const [attributes, setAttributes] = useState<VariantAttributes>({
     width: (data.metadata?.box as any)?.width || "-",
     length: (data.metadata?.box as any)?.length || "-",
@@ -58,13 +57,17 @@ const AttributeVariantsWidget = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!data.product_id || !data.id) return;
+    const productVariant = await sdk.admin.product.retrieveVariant(
+      data.product_id,
+      data.id
+    );
     setAttributes(formData);
-    sdk.admin.product.updateVariant(data.product_id, data.id, {
+    await sdk.admin.product.updateVariant(data.product_id, data.id, {
       metadata: {
-        ...data.metadata,
+        ...productVariant.variant.metadata,
         box: {
           ...formData,
         },

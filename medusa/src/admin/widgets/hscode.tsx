@@ -96,9 +96,10 @@ const HscodeWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     }
 
     try {
+      const product = await sdk.admin.product.retrieve(data.id);
       await sdk.admin.product.update(data.id, {
         metadata: {
-          ...data.metadata,
+          ...product.product.metadata,
           hscode_general: formData.hscode_general,
           hscode_colombia: formData.hscode_colombia,
           ncm_argentina: formData.ncm_argentina,

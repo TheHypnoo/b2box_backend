@@ -21,9 +21,13 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
     setHasBattery(checked);
 
     try {
+      const productVariant = await sdk.admin.product.retrieveVariant(
+        data.product_id,
+        data.id
+      );
       await sdk.admin.product.updateVariant(data.product_id, data.id, {
         metadata: {
-          ...data.metadata,
+          ...productVariant.variant.metadata,
           has_battery: checked,
         },
       });
@@ -37,9 +41,13 @@ const ExtrasWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
     setIsClothing(checked);
 
     try {
+      const productVariant = await sdk.admin.product.retrieveVariant(
+        data.product_id,
+        data.id
+      );
       await sdk.admin.product.updateVariant(data.product_id, data.id, {
         metadata: {
-          ...data.metadata,
+          ...productVariant.variant.metadata,
           is_clothing: checked,
         },
       });

@@ -48,9 +48,10 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     if (!data.id) return;
 
     try {
+      const product = await sdk.admin.product.retrieve(data.id);
       await sdk.admin.product.update(data.id, {
         metadata: {
-          ...data.metadata,
+          ...product.product.metadata,
           bx_code: formData.bx_code,
         },
       });
@@ -66,9 +67,10 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     setIsVerified(checked);
 
     try {
+      const product = await sdk.admin.product.retrieve(data.id);
       await sdk.admin.product.update(data.id, {
         metadata: {
-          ...data.metadata,
+          ...product.product.metadata,
           b2box_verified: checked,
         },
       });
@@ -82,9 +84,10 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     setIsVideoVerified(checked);
 
     try {
+      const product = await sdk.admin.product.retrieve(data.id);
       await sdk.admin.product.update(data.id, {
         metadata: {
-          ...data.metadata,
+          ...product.product.metadata,
           b2box_verified_video: checked,
         },
       });
@@ -106,8 +109,19 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
         </IconButton>
       </div>
       <SectionRow title="BX Code" value={bxCode} />
-      <SectionRow title="Verified Product" value={<Switch checked={isVerified} onCheckedChange={handleToggle} />} />
-      <SectionRow title="Verified Video" value={<Switch checked={isVideoVerified} onCheckedChange={handleVideoToggle} />} />
+      <SectionRow
+        title="Verified Product"
+        value={<Switch checked={isVerified} onCheckedChange={handleToggle} />}
+      />
+      <SectionRow
+        title="Verified Video"
+        value={
+          <Switch
+            checked={isVideoVerified}
+            onCheckedChange={handleVideoToggle}
+          />
+        }
+      />
 
       {/* Drawer for editing BX Code */}
       <Drawer open={isDrawerOpen} onOpenChange={handleCloseDrawer}>

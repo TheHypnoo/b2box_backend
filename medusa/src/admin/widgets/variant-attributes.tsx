@@ -22,10 +22,10 @@ const VariantAttributesWidget = ({
   data,
 }: DetailWidgetProps<AdminProductVariant>) => {
   const [variantData, setVariantData] = useState({
-    weight: (data.metadata?.product as any)?.weight || "",
-    length: (data.metadata?.product as any)?.length || "",
-    height: (data.metadata?.product as any)?.height || "",
-    width: (data.metadata?.product as any)?.width || "",
+    weight: (data.metadata?.product as any)?.weight?.toString() || "-",
+    length: (data.metadata?.product as any)?.length?.toString() || "-",
+    height: (data.metadata?.product as any)?.height?.toString() || "-",
+    width: (data.metadata?.product as any)?.width?.toString() || "-",
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -45,10 +45,10 @@ const VariantAttributesWidget = ({
 
   const handleEdit = () => {
     setFormData({
-      weight: variantData.weight,
-      length: variantData.length,
-      height: variantData.height,
-      width: variantData.width,
+      weight: variantData.weight === "-" ? "" : variantData.weight,
+      length: variantData.length === "-" ? "" : variantData.length,
+      height: variantData.height === "-" ? "" : variantData.height,
+      width: variantData.width === "-" ? "" : variantData.width,
     });
     setErrors({
       weight: false,
@@ -100,18 +100,27 @@ const VariantAttributesWidget = ({
     }
 
     try {
+      const productVariant = await sdk.admin.product.retrieveVariant(
+        data.product_id,
+        data.id
+      );
       await sdk.admin.product.updateVariant(data.product_id, data.id, {
         metadata: {
-          ...data.metadata,
+          ...productVariant.variant.metadata,
           product: {
-            weight: formData.weight ? parseFloat(formData.weight) : null,
-            length: formData.length ? parseFloat(formData.length) : null,
-            height: formData.height ? parseFloat(formData.height) : null,
-            width: formData.width ? parseFloat(formData.width) : null,
+            weight: formData.weight,
+            length: formData.length,
+            height: formData.height,
+            width: formData.width,
           },
         },
       });
-      setVariantData(formData);
+      setVariantData({
+        weight: formData.weight || "-",
+        length: formData.length || "-",
+        height: formData.height || "-",
+        width: formData.width || "-",
+      });
       setIsDrawerOpen(false);
     } catch (error) {
       console.error("Error updating variant attributes:", error);

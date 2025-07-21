@@ -165,11 +165,16 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   // 5. Update handleSubmit to save all pricing data in metadata.pricing
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!data.product_id || !data.id) return;
     try {
+      const productVariant = await sdk.admin.product.retrieveVariant(
+        data.product_id!,
+        data.id
+      );
       // Save all pricing data in metadata.pricing
       await sdk.admin.product.updateVariant(data.product_id!, data.id, {
         metadata: {
-          ...data.metadata,
+          ...productVariant.variant.metadata,
           pricing: {
             purchasePrices: formData.purchasePrices,
             minQuantities: formData.minQuantities,

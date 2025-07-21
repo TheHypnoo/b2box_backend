@@ -139,9 +139,10 @@ const MultilingualWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     if (!data.id) return;
 
     try {
+      const product = await sdk.admin.product.retrieve(data.id);
       await sdk.admin.product.update(data.id, {
         metadata: {
-          ...data.metadata,
+          ...product.product.metadata,
           multilingual: formData,
         },
       });

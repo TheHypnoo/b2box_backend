@@ -12,6 +12,7 @@ import {
   DetailWidgetProps,
   AdminProductVariant,
 } from "@medusajs/framework/types";
+import { sdk } from "../lib/sdk";
 
 const DuplicateVariantWidget = ({
   data,
@@ -35,11 +36,20 @@ const DuplicateVariantWidget = ({
     setError(null);
     setSuccess(null);
     setLoading(true);
+    if (!data.product_id || !data.id) return;
+    const productVariant = await sdk.admin.product.retrieveVariant(
+      data.product_id,
+      data.id
+    );
     try {
       const response = await fetch("/admin/variant-duplicate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ variant: data, option, sku }),
+        body: JSON.stringify({
+          variant: productVariant.variant,
+          option,
+          sku,
+        }),
       });
       if (!response.ok) {
         const err = await response.json();

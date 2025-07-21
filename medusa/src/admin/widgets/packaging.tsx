@@ -92,9 +92,13 @@ const PackagingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
     }
 
     try {
+      const productVariant = await sdk.admin.product.retrieveVariant(
+        data.product_id,
+        data.id
+      );
       await sdk.admin.product.updateVariant(data.product_id, data.id, {
         metadata: {
-          ...data.metadata,
+          ...productVariant.variant.metadata,
           packaging: {
             status: formData.status,
             price: formData.price,
