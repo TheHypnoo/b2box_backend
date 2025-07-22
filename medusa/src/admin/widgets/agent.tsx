@@ -18,10 +18,11 @@ const AGENTS = ["Jessica", "Kerwin"];
 const AgentWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
   const [agent, setAgent] = useState((data.metadata?.agent as string) || "-");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selected, setSelected] = useState(agent !== "-" ? agent : "-");
+  const [selected, setSelected] = useState(
+    (data.metadata?.agent as string) || "-"
+  );
 
   const handleEdit = () => {
-    setSelected("-");
     setIsDrawerOpen(true);
   };
 
