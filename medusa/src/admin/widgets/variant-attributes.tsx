@@ -22,39 +22,39 @@ const VariantAttributesWidget = ({
   data,
 }: DetailWidgetProps<AdminProductVariant>) => {
   const [variantData, setVariantData] = useState({
-    weight: (data.metadata?.product as any)?.weight?.toString() || "-",
     length: (data.metadata?.product as any)?.length?.toString() || "-",
-    height: (data.metadata?.product as any)?.height?.toString() || "-",
     width: (data.metadata?.product as any)?.width?.toString() || "-",
+    height: (data.metadata?.product as any)?.height?.toString() || "-",
+    weight: (data.metadata?.product as any)?.weight?.toString() || "-",
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formData, setFormData] = useState({
-    weight: "",
     length: "",
-    height: "",
     width: "",
+    height: "",
+    weight: "",
   });
 
   const [errors, setErrors] = useState({
-    weight: false,
     length: false,
-    height: false,
     width: false,
+    height: false,
+    weight: false,
   });
 
   const handleEdit = () => {
     setFormData({
-      weight: variantData.weight === "-" ? "" : variantData.weight,
       length: variantData.length === "-" ? "" : variantData.length,
-      height: variantData.height === "-" ? "" : variantData.height,
       width: variantData.width === "-" ? "" : variantData.width,
+      height: variantData.height === "-" ? "" : variantData.height,
+      weight: variantData.weight === "-" ? "" : variantData.weight,
     });
     setErrors({
-      weight: false,
       length: false,
-      height: false,
       width: false,
+      height: false,
+      weight: false,
     });
     setIsDrawerOpen(true);
   };
@@ -63,7 +63,7 @@ const VariantAttributesWidget = ({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (["weight", "length", "height", "width"].includes(name)) {
+    if (["length", "width", "height", "weight"].includes(name)) {
       const isValid =
         value === "" || (/^\d+(\.\d+)?$/.test(value) && parseFloat(value) >= 0);
       setErrors((prev) => ({ ...prev, [name]: !isValid }));
@@ -75,22 +75,22 @@ const VariantAttributesWidget = ({
     if (!data.product_id || !data.id) return;
 
     const newErrors = {
-      weight:
-        formData.weight !== "" &&
-        (!/^\d+(\.\d+)?$/.test(formData.weight) ||
-          parseFloat(formData.weight) < 0),
       length:
         formData.length !== "" &&
         (!/^\d+(\.\d+)?$/.test(formData.length) ||
           parseFloat(formData.length) < 0),
-      height:
-        formData.height !== "" &&
-        (!/^\d+(\.\d+)?$/.test(formData.height) ||
-          parseFloat(formData.height) < 0),
       width:
         formData.width !== "" &&
         (!/^\d+(\.\d+)?$/.test(formData.width) ||
           parseFloat(formData.width) < 0),
+      height:
+        formData.height !== "" &&
+        (!/^\d+(\.\d+)?$/.test(formData.height) ||
+          parseFloat(formData.height) < 0),
+      weight:
+        formData.weight !== "" &&
+        (!/^\d+(\.\d+)?$/.test(formData.weight) ||
+          parseFloat(formData.weight) < 0),
     };
 
     setErrors(newErrors);
@@ -108,18 +108,18 @@ const VariantAttributesWidget = ({
         metadata: {
           ...productVariant.variant.metadata,
           product: {
-            weight: formData.weight,
             length: formData.length,
-            height: formData.height,
             width: formData.width,
+            height: formData.height,
+            weight: formData.weight,
           },
         },
       });
       setVariantData({
-        weight: formData.weight || "-",
         length: formData.length || "-",
-        height: formData.height || "-",
         width: formData.width || "-",
+        height: formData.height || "-",
+        weight: formData.weight || "-",
       });
       setIsDrawerOpen(false);
     } catch (error) {
@@ -156,25 +156,6 @@ const VariantAttributesWidget = ({
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
               >
                 <div>
-                  <Label htmlFor="weight">Weight (kg)</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    name="weight"
-                    value={formData.weight}
-                    onChange={handleChange}
-                    min="0"
-                    step="0.01"
-                    placeholder="Weight in kg"
-                    className={errors.weight ? "border-red-500" : ""}
-                  />
-                  {errors.weight && (
-                    <Text size="small" className="mt-1 text-red-500">
-                      Must be a positive number
-                    </Text>
-                  )}
-                </div>
-                <div>
                   <Label htmlFor="length">Length (cm)</Label>
                   <Input
                     id="length"
@@ -188,6 +169,25 @@ const VariantAttributesWidget = ({
                     className={errors.length ? "border-red-500" : ""}
                   />
                   {errors.length && (
+                    <Text size="small" className="mt-1 text-red-500">
+                      Must be a positive number
+                    </Text>
+                  )}
+                </div>
+                <div>
+                  <Label htmlFor="width">Width (cm)</Label>
+                  <Input
+                    id="width"
+                    type="number"
+                    name="width"
+                    value={formData.width}
+                    onChange={handleChange}
+                    min="0"
+                    step="0.01"
+                    placeholder="Width in centimeters"
+                    className={errors.width ? "border-red-500" : ""}
+                  />
+                  {errors.width && (
                     <Text size="small" className="mt-1 text-red-500">
                       Must be a positive number
                     </Text>
@@ -213,19 +213,19 @@ const VariantAttributesWidget = ({
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="width">Width (cm)</Label>
+                  <Label htmlFor="weight">Weight (kg)</Label>
                   <Input
-                    id="width"
+                    id="weight"
                     type="number"
-                    name="width"
-                    value={formData.width}
+                    name="weight"
+                    value={formData.weight}
                     onChange={handleChange}
                     min="0"
                     step="0.01"
-                    placeholder="Width in centimeters"
-                    className={errors.width ? "border-red-500" : ""}
+                    placeholder="Weight in kg"
+                    className={errors.weight ? "border-red-500" : ""}
                   />
-                  {errors.width && (
+                  {errors.weight && (
                     <Text size="small" className="mt-1 text-red-500">
                       Must be a positive number
                     </Text>

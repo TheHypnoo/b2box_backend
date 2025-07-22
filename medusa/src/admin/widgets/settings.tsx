@@ -23,7 +23,7 @@ const SettingsWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
     Boolean(data.metadata?.b2box_verified)
   );
   const [isVideoVerified, setIsVideoVerified] = useState(
-    Boolean(data.metadata?.b2box_verified_video)
+    Boolean(data.metadata?.verified_video)
   );
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);

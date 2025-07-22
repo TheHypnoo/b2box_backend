@@ -18,8 +18,8 @@ import {
 import SectionRow from "../components/SectionRow";
 
 interface VariantAttributes {
-  width: string;
   length: string;
+  width: string;
   height: string;
   weight: string;
 }
@@ -28,24 +28,24 @@ const AttributeVariantsWidget = ({
   data,
 }: DetailWidgetProps<AdminProductVariant>) => {
   const [attributes, setAttributes] = useState<VariantAttributes>({
-    width: (data.metadata?.box as any)?.width || "-",
     length: (data.metadata?.box as any)?.length || "-",
+    width: (data.metadata?.box as any)?.width || "-",
     height: (data.metadata?.box as any)?.height || "-",
     weight: (data.metadata?.box as any)?.weight || "-",
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [formData, setFormData] = useState({
-    width: "",
     length: "",
+    width: "",
     height: "",
     weight: "",
   });
 
   const handleEdit = () => {
     setFormData({
-      width: attributes.width,
       length: attributes.length,
+      width: attributes.width,
       height: attributes.height,
       weight: attributes.weight,
     });
@@ -69,7 +69,10 @@ const AttributeVariantsWidget = ({
       metadata: {
         ...productVariant.variant.metadata,
         box: {
-          ...formData,
+          length: formData.length,
+          width: formData.width,
+          height: formData.height,
+          weight: formData.weight,
         },
       },
     });
@@ -105,20 +108,6 @@ const AttributeVariantsWidget = ({
                 style={{ display: "flex", flexDirection: "column", gap: 16 }}
               >
                 <div>
-                  <Label htmlFor="width">Width (cm)</Label>
-                  <Input
-                    id="width"
-                    type="number"
-                    name="width"
-                    value={formData.width}
-                    onChange={handleChange}
-                    min="0"
-                    step="any"
-                    required
-                    placeholder="Enter width"
-                  />
-                </div>
-                <div>
                   <Label htmlFor="length">Length (cm)</Label>
                   <Input
                     id="length"
@@ -130,6 +119,20 @@ const AttributeVariantsWidget = ({
                     step="any"
                     required
                     placeholder="Enter length"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="width">Width (cm)</Label>
+                  <Input
+                    id="width"
+                    type="number"
+                    name="width"
+                    value={formData.width}
+                    onChange={handleChange}
+                    min="0"
+                    step="any"
+                    required
+                    placeholder="Enter width"
                   />
                 </div>
                 <div>
