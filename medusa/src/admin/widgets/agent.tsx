@@ -18,7 +18,7 @@ const AGENTS = ["Jessica", "Kerwin"];
 const AgentWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
   const [agent, setAgent] = useState((data.metadata?.agent as string) || "-");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selected, setSelected] = useState("-");
+  const [selected, setSelected] = useState(agent !== "-" ? agent : "-");
 
   const handleEdit = () => {
     setSelected("-");
@@ -92,7 +92,11 @@ const AgentWidget = ({ data }: DetailWidgetProps<AdminProduct>) => {
             <Button variant="secondary" onClick={handleCloseDrawer}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSubmit} disabled={selected === "-"}>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={selected === "-"}
+            >
               Save changes
             </Button>
           </Drawer.Footer>
