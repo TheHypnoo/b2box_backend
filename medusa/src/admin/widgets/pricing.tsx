@@ -50,9 +50,36 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Añadir estados de error para los inputs
+  const [inputErrors, setInputErrors] = useState({
+    purchasePrices: { tier1: false, tier2: false, tier3: false },
+    minQuantities: { tier1: false, tier2: false, tier3: false },
+    margins: {} as Record<
+      string,
+      { tier1: boolean; tier2: boolean; tier3: boolean }
+    >,
+  });
+
+  // Añadir estado para errores de lógica de cantidades
+  const [quantityLogicErrors, setQuantityLogicErrors] = useState({
+    tier1: false,
+    tier2: false,
+  });
+
   const packaging = useMemo(() => {
     return data.metadata?.packaging as Packaging | undefined;
   }, [data.metadata]);
+
+  // Validar lógica de minQuantities cada vez que cambian
+  useEffect(() => {
+    const min1 = formData.minQuantities.tier1 ?? 0;
+    const min2 = formData.minQuantities.tier2 ?? 0;
+    const min3 = formData.minQuantities.tier3 ?? 0;
+    setQuantityLogicErrors({
+      tier1: min1 >= min2 && min2 !== 0,
+      tier2: min2 >= min3 && min3 !== 0,
+    });
+  }, [formData.minQuantities]);
 
   // Load currencies and current pricing data
   useEffect(() => {
@@ -115,6 +142,13 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
 
   // 3. Update handlers for purchase price, min quantity, and margin
   const updatePurchasePrice = (tier: string, amount: number | null) => {
+    setInputErrors((prev) => ({
+      ...prev,
+      purchasePrices: {
+        ...prev.purchasePrices,
+        [tier]: amount !== null && amount < 0,
+      },
+    }));
     setFormData((prev) => ({
       ...prev,
       purchasePrices: {
@@ -125,6 +159,13 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   };
 
   const updateMinQuantity = (tier: string, quantity: number | null) => {
+    setInputErrors((prev) => ({
+      ...prev,
+      minQuantities: {
+        ...prev.minQuantities,
+        [tier]: quantity !== null && quantity < 0,
+      },
+    }));
     setFormData((prev) => ({
       ...prev,
       minQuantities: {
@@ -139,6 +180,20 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
     tier: number,
     margin: number | null
   ) => {
+    setInputErrors((prev) => ({
+      ...prev,
+      margins: {
+        ...prev.margins,
+        [currency]: {
+          ...(prev.margins[currency] || {
+            tier1: false,
+            tier2: false,
+            tier3: false,
+          }),
+          [`tier${tier}`]: margin !== null && margin < 0,
+        },
+      },
+    }));
     setFormData((prev) => ({
       ...prev,
       margins: {
@@ -291,14 +346,16 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         {!formData.includePackaging && (packaging?.price as number) > 0 && (
           <div className="mb-4 p-3 bg-gray-50 border border-gray-200 rounded-lg">
             <Text size="small" className="text-gray-600">
-              📦 Packaging price: ¥{packaging?.price as number} CNY (included in
-              calculations)
+              📦 Packaging price: ¥{Number(packaging?.price ?? 0).toFixed(2)}{" "}
+              CNY (included in calculations)
             </Text>
           </div>
         )}
         {Object.entries(formData.purchasePrices).map(([tier, amount]) => {
           const packagingPrice = (packaging?.price as number) || 0;
-          const totalWithPackaging = (amount || 0) + packagingPrice;
+          const totalWithPackaging = Number(
+            ((amount || 0) + packagingPrice).toFixed(2)
+          );
 
           return (
             <div key={tier} className="border rounded-lg p-4 mb-4">
@@ -329,12 +386,14 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
               </div>
               <SectionRow
                 title="Base Purchase Price"
-                value={amount !== null ? `¥${amount} CNY` : "—"}
+                value={
+                  amount !== null ? `¥${Number(amount).toFixed(2)} CNY` : "—"
+                }
               />
               {!formData.includePackaging && packagingPrice > 0 && (
                 <SectionRow
                   title="Total (Base + Packaging)"
-                  value={`¥${totalWithPackaging} CNY`}
+                  value={`¥${totalWithPackaging.toFixed(2)} CNY`}
                 />
               )}
 
@@ -356,9 +415,32 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                           tier2: number | null;
                           tier3: number | null;
                         }
-                      ] || null;
+                      ] ?? null;
 
-                    if (margin === null) return null;
+                    // Solo mostrar el salePrice si amount y margin son válidos
+                    if (
+                      amount === null ||
+                      margin === null ||
+                      isNaN(amount) ||
+                      isNaN(margin)
+                    ) {
+                      return (
+                        <div key={currencyCode} className="mb-2 last:mb-0">
+                          <div className="flex justify-between items-center py-2">
+                            <div className="flex items-center gap-2">
+                              <Text size="small" className="font-medium">
+                                {currencyCode.toUpperCase()}
+                              </Text>
+                            </div>
+                            <div className="text-right">
+                              <Text size="xsmall" color="secondary">
+                                Complete all fields to see sale price
+                              </Text>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
 
                     const salePrice = calculateSalePrice(
                       amount,
@@ -434,17 +516,26 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                               <Label>Base Purchase Price (CNY)</Label>
                               <Input
                                 type="number"
-                                value={amount || ""}
+                                value={amount ?? ""}
                                 onChange={(e) =>
                                   updatePurchasePrice(
                                     tier,
-                                    Number(e.target.value) || null
+                                    e.target.value === ""
+                                      ? null
+                                      : Number(e.target.value)
                                   )
                                 }
                                 min="0"
                                 step="0.01"
                                 placeholder="Enter purchase price"
                               />
+                              {inputErrors.purchasePrices[
+                                tier as keyof typeof inputErrors.purchasePrices
+                              ] && (
+                                <Text size="xsmall" color="danger">
+                                  Price cannot be negative
+                                </Text>
+                              )}
                             </div>
                             <div>
                               <Label>Minimum Quantity</Label>
@@ -466,6 +557,27 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                                 min="1"
                                 placeholder="Minimum quantity"
                               />
+                              {inputErrors.minQuantities[
+                                tier as keyof typeof inputErrors.minQuantities
+                              ] && (
+                                <Text size="xsmall" color="danger">
+                                  Quantity cannot be negative
+                                </Text>
+                              )}
+                              {tier === "tier1" &&
+                                quantityLogicErrors.tier1 && (
+                                  <Text size="xsmall" color="danger">
+                                    Tier 1 minimum must be less than Tier 2
+                                    minimum
+                                  </Text>
+                                )}
+                              {tier === "tier2" &&
+                                quantityLogicErrors.tier2 && (
+                                  <Text size="xsmall" color="danger">
+                                    Tier 2 minimum must be less than Tier 3
+                                    minimum
+                                  </Text>
+                                )}
                             </div>
                           </div>
                         </div>
@@ -527,6 +639,17 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                                 step="0.01"
                                 placeholder="25"
                               />
+                              {inputErrors.margins[currency.currency_code]?.[
+                                `tier${tier}` as keyof {
+                                  tier1: boolean;
+                                  tier2: boolean;
+                                  tier3: boolean;
+                                }
+                              ] && (
+                                <Text size="xsmall" color="danger">
+                                  Margin cannot be negative
+                                </Text>
+                              )}
                             </div>
                           </div>
                         );
@@ -541,7 +664,18 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
             <Button variant="secondary" onClick={handleCloseDrawer}>
               Cancel
             </Button>
-            <Button variant="primary" onClick={handleSubmit}>
+            <Button
+              variant="primary"
+              onClick={handleSubmit}
+              disabled={
+                Object.values(inputErrors.purchasePrices).some(Boolean) ||
+                Object.values(inputErrors.minQuantities).some(Boolean) ||
+                Object.values(inputErrors.margins).some(
+                  (m) => m && Object.values(m).some(Boolean)
+                ) ||
+                Object.values(quantityLogicErrors).some(Boolean)
+              }
+            >
               Save Changes
             </Button>
           </Drawer.Footer>
