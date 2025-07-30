@@ -18,12 +18,14 @@ import {
   DetailWidgetProps,
   AdminProductVariant,
   AdminStoreCurrency,
+  AdminRegion,
 } from "@medusajs/framework/types";
 import SectionRow from "../components/SectionRow";
 import { Packaging, Pricing, PricingData } from "../types";
 
 const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
   const [currencies, setCurrencies] = useState<AdminStoreCurrency[]>([]);
+  const [regions, setRegions] = useState<AdminRegion[]>([]);
   const [pricingData, setPricingData] = useState<PricingData | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
@@ -90,9 +92,13 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
 
         // Load available currencies
         const storeResponse = await sdk.admin.store.list();
-        const availableCurrencies =
-          storeResponse.stores?.[0]?.supported_currencies || [];
-        setCurrencies(availableCurrencies);
+        const regionsResponse = await sdk.admin.region.list();
+
+        setRegions(regionsResponse.regions || []);
+
+        console.log("regionsResponse", regionsResponse);
+
+        setCurrencies(storeResponse.stores?.[0]?.supported_currencies || []);
 
         // Load current pricing data
         const pricingResponse = (await sdk.client.fetch(
@@ -104,13 +110,14 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
             priceSetId: pricingResponse.priceSetId,
             prices: pricingResponse.prices || [],
           });
+          console.log("pricingResponse", pricingResponse);
         } else {
           setPricingData(null);
         }
 
         // Initialize margins for currencies that don't exist in formData yet
         const currentMargins = formData.margins;
-        availableCurrencies.forEach((currency) => {
+        currencies.forEach((currency: AdminStoreCurrency) => {
           if (!currentMargins[currency.currency_code]) {
             setFormData((prev) => ({
               ...prev,
@@ -276,6 +283,11 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
               currency_code: currencyCode,
               min_quantity: minQty,
               max_quantity: maxQty,
+              rules: {
+                region_id: regions.find(
+                  (region) => region.currency_code === currencyCode
+                )?.id,
+              },
             });
           }
         }
