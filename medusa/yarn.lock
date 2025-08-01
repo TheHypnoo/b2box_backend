@@ -6414,12 +6414,12 @@
   dependencies:
     undici-types "~6.20.0"
 
-"@types/node@^20.0.0":
-  version "20.17.16"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.17.16.tgz#b33b0edc1bf925b27349e494b871ca4451fabab4"
-  integrity sha512-vOTpLduLkZXePLxHiHsBLp98mHGnl8RptV4YAO3HfKO5UHjDvySGbxKtpYfy8Sx5+WKcgc45qNreJJRVM3L6mw==
+"@types/node@^20.19.9":
+  version "20.19.9"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.19.9.tgz#ca9a58193fec361cc6e859d88b52261853f1f0d3"
+  integrity sha512-cuVNgarYWZqxRJDQHEB58GEONhOK79QVR/qYx4S7kcUObQvUwvFnYxJuuHUKm2aieN9X3yZB4LZsuYNU1Qphsw==
   dependencies:
-    undici-types "~6.19.2"
+    undici-types "~6.21.0"
 
 "@types/pluralize@^0.0.33":
   version "0.0.33"
@@ -9716,10 +9716,10 @@ medusa-plugin-import-shopify@^0.0.8:
     "@shopify/admin-api-client" "^1.1.1"
     axios "^1.10.0"
 
-medusa-variant-images@^1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/medusa-variant-images/-/medusa-variant-images-1.1.2.tgz#b220ebd03dc7a477018ee22607443525fed178d4"
-  integrity sha512-KHAMSVkxer9OBxrvhYijcZjxpgjRGopXccRMbmK9GGBjj9z/cRUW2hNMx6CBg+oJo8Dc7dwJtmp3UUF8+qFWVA==
+medusa-variant-images@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/medusa-variant-images/-/medusa-variant-images-1.1.3.tgz#23478ff026da03c8a1052bb798c07f630207e3c0"
+  integrity sha512-KebCHk0FUEl9ClZmdQFL8KggVSjBIlkOunXD/WqGb6/q2eNcIPSNePm3B1Meu7ecXwLUDPrn35B3PMiQYkCKXw==
   dependencies:
     lodash-es "^4.17.21"
 
@@ -11798,15 +11798,15 @@ unc-path-regex@^0.1.2:
   resolved "https://registry.yarnpkg.com/unc-path-regex/-/unc-path-regex-0.1.2.tgz#e73dd3d7b0d7c5ed86fbac6b0ae7d8c6a69d50fa"
   integrity sha512-eXL4nmJT7oCpkZsHZUOJo8hcX3GbsiDOa0Qu9F646fi8dT3XuSVopVqAcEiVzSKKH7UoDti23wNX3qGFxcW5Qg==
 
-undici-types@~6.19.2:
-  version "6.19.8"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.19.8.tgz#35111c9d1437ab83a7cdc0abae2f26d88eda0a02"
-  integrity sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==
-
 undici-types@~6.20.0:
   version "6.20.0"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.20.0.tgz#8171bf22c1f588d1554d55bf204bc624af388433"
   integrity sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg==
+
+undici-types@~6.21.0:
+  version "6.21.0"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-6.21.0.tgz#691d00af3909be93a7faa13be61b3a5b50ef12cb"
+  integrity sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==
 
 unique-string@^2.0.0:
   version "2.0.0"
