@@ -36,7 +36,8 @@
     "medusa-backup": "^1.5.2",
     "medusa-plugin-import-shopify": "^0.0.8",
     "medusa-variant-images": "^1.1.2",
-    "pg": "^8.16.3"
+    "pg": "^8.16.3",
+    "twilio": "^5.8.0"
   },
   "devDependencies": {
     "@medusajs/test-utils": "2.8.8",
