@@ -1,4 +1,9 @@
-import { loadEnv, defineConfig } from "@medusajs/framework/utils";
+import {
+  loadEnv,
+  defineConfig,
+  Modules,
+  ContainerRegistrationKeys,
+} from "@medusajs/framework/utils";
 
 loadEnv(process.env.NODE_ENV || "development", process.cwd());
 
@@ -13,6 +18,10 @@ module.exports = defineConfig({
       authCors: process.env.AUTH_CORS!,
       jwtSecret: process.env.JWT_SECRET || "supersecret",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret",
+      authMethodsPerActor: {
+        user: ["emailpass"],
+        customer: ["emailpass", "phone-auth"],
+      },
     },
   },
 
@@ -62,6 +71,31 @@ module.exports = defineConfig({
               additional_client_config: {
                 forcePathStyle: process.env.S3_FORCE_PATH_STYLE,
               },
+            },
+          },
+        ],
+      },
+    },
+    {
+      resolve: "@medusajs/medusa/auth",
+      dependencies: [
+        Modules.CACHE,
+        ContainerRegistrationKeys.LOGGER,
+        Modules.EVENT_BUS,
+      ],
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/auth-emailpass",
+            id: "emailpass",
+          },
+          {
+            resolve: "./src/modules/phone-auth",
+            id: "phone-auth",
+            options: {
+              accountSid: process.env.TWILIO_ACCOUNT_SID,
+              authToken: process.env.TWILIO_AUTH_TOKEN,
+              serviceSid: process.env.TWILIO_SERVICE_SID,
             },
           },
         ],
