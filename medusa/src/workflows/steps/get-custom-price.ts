@@ -1,11 +1,5 @@
-import { ProductVariantDTO, RegionDTO } from "@medusajs/framework/types";
-import { MedusaError } from "@medusajs/framework/utils";
-import {
-  createStep,
-  StepResponse,
-  WorkflowData,
-} from "@medusajs/framework/workflows-sdk";
-import { Region } from "../../../.medusa/types/query-entry-points";
+import { ProductVariantDTO } from "@medusajs/framework/types";
+import { createStep, StepResponse } from "@medusajs/framework/workflows-sdk";
 
 export type GetCustomPriceStepInput = {
   variant: ProductVariantDTO & {
@@ -21,7 +15,7 @@ export type GetCustomPriceStepInput = {
   };
   quantity: number;
   metadata?: Record<string, unknown>;
-  region: (Region | WorkflowData<Region>) & Region;
+  region: any; //TODO: fix this
 };
 
 // Servicios con precio fijo
