@@ -20,7 +20,10 @@ type CustomAddToCartWorkflowInput = {
 };
 
 export const customAddToCartWorkflow = createWorkflow(
-  "custom-add-to-cart",
+  {
+    name: "custom-add-to-cart",
+    store: true,
+  },
   (input: CustomAddToCartWorkflowInput) => {
     const { data: carts } = useQueryGraphStep({
       entity: "cart",
@@ -49,6 +52,8 @@ export const customAddToCartWorkflow = createWorkflow(
         price,
       },
       (data) => {
+        console.log("data", data);
+        console.log("price", data.price);
         return {
           variant_id: data.item.variant_id,
           quantity: data.item.quantity || 1,
