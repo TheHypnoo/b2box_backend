@@ -8,6 +8,7 @@ import {
   useQueryGraphStep,
 } from "@medusajs/medusa/core-flows";
 import { getCustomPriceWorkflow } from "./get-custom-price";
+import { logger } from "@medusajs/framework";
 
 type CustomAddToCartWorkflowInput = {
   item: {
@@ -39,6 +40,8 @@ export const customAddToCartWorkflow = createWorkflow(
         quantity: input.item.quantity || 1,
       },
     });
+    console.log("price", price);
+    logger.info(`price, ${JSON.stringify(price, null, 2)}`);
 
     const itemData = transform(
       {
@@ -54,6 +57,8 @@ export const customAddToCartWorkflow = createWorkflow(
         };
       }
     );
+    console.log("itemData", itemData);
+    logger.info(`itemData, ${JSON.stringify(itemData, null, 2)}`);
 
     addToCartWorkflow.runAsStep({
       input: {
@@ -61,6 +66,11 @@ export const customAddToCartWorkflow = createWorkflow(
         items: [itemData],
       },
     });
+
+    console.log("addToCartWorkflow", addToCartWorkflow);
+    logger.info(
+      `addToCartWorkflow, ${JSON.stringify(addToCartWorkflow, null, 2)}`
+    );
 
     // refetch the updated cart
     const { data: updatedCart } = useQueryGraphStep({
