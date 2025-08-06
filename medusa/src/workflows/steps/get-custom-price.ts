@@ -76,6 +76,8 @@ export const getCustomPriceStep = createStep(
       return new StepResponse((pricePerUnit * quantity).toFixed(2));
     }
 
+    console.log("variant_calculated_price", variant.calculated_price);
+
     // Buscar el precio con amount más bajo (mejor tier) solo para servicios con porcentaje
     const bestPrice = variant.prices?.reduce((best, current) => {
       return current.amount < best.amount ? current : best;
