@@ -4,8 +4,13 @@ import { customAddToCartWorkflow } from "../../../../../workflows/custom-add-to-
 
 export const PostAddCustomLineItemSchema = z.object({
   variant_id: z.string(),
-  quantity: z.number().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  quantity: z.number(),
+  metadata: z.object({
+    extra_labelling_for_marketplaces: z.boolean(),
+    extra_barcode_registration: z.boolean(),
+    extra_commercial_photos: z.boolean(),
+    extra_optimized_packaging: z.boolean(),
+  }),
 });
 
 type PostAddCustomLineItemSchemaType = z.infer<

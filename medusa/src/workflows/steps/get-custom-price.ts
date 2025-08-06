@@ -21,12 +21,12 @@ export type GetCustomPriceStepInput = {
 // Servicios con precio fijo
 const FIXED_PRICE_SERVICES = [
   "extra_barcode_registration",
-  "extra_commercial_photos", //25
+  "extra_commercial_photos",
 ];
 
 // Servicios con precio calculado por porcentaje del tier3
 const PERCENTAGE_SERVICES = [
-  "extra_labelling_for_marketplaces", //5
+  "extra_labelling_for_marketplaces",
   "extra_optimized_packaging",
 ];
 
