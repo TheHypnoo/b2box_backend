@@ -43,8 +43,6 @@ export const customAddToCartWorkflow = createWorkflow(
         quantity: input.item.quantity || 1,
       },
     });
-    console.log("price", price);
-    logger.info(`price, ${JSON.stringify(price, null, 2)}`);
 
     const itemData = transform(
       {
@@ -54,16 +52,18 @@ export const customAddToCartWorkflow = createWorkflow(
       (data) => {
         console.log("data", data);
         console.log("price", data.price);
+        console.log(
+          "Math.round(Number(data.price))",
+          Math.round(Number(data.price))
+        );
         return {
           variant_id: data.item.variant_id,
           quantity: data.item.quantity || 1,
           metadata: data.item.metadata,
-          unit_price: data.price,
+          unit_price: Math.round(Number(data.price)),
         };
       }
     );
-    console.log("itemData", itemData);
-    logger.info(`itemData, ${JSON.stringify(itemData, null, 2)}`);
 
     addToCartWorkflow.runAsStep({
       input: {
@@ -71,11 +71,6 @@ export const customAddToCartWorkflow = createWorkflow(
         items: [itemData],
       },
     });
-
-    console.log("addToCartWorkflow", addToCartWorkflow);
-    logger.info(
-      `addToCartWorkflow, ${JSON.stringify(addToCartWorkflow, null, 2)}`
-    );
 
     // refetch the updated cart
     const { data: updatedCart } = useQueryGraphStep({
