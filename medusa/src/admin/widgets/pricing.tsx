@@ -278,8 +278,9 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                   ] ?? 0) - 1 || null
                 : null;
 
+            // Add price with rules (region_id)
             salePrices.push({
-              amount: Math.round(salePrice * 100) / 100,
+              amount: Number(salePrice.toFixed(2)),
               currency_code: currencyCode,
               min_quantity: minQty,
               max_quantity: maxQty,
@@ -288,6 +289,15 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                   (region) => region.currency_code === currencyCode
                 )?.id,
               },
+            });
+
+            // Add price without rules (no region_id)
+            salePrices.push({
+              amount: Number(salePrice.toFixed(2)),
+              currency_code: currencyCode,
+              min_quantity: minQty,
+              max_quantity: maxQty,
+              rules: {},
             });
           }
         }

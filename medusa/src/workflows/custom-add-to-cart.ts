@@ -8,7 +8,6 @@ import {
   useQueryGraphStep,
 } from "@medusajs/medusa/core-flows";
 import { getCustomPriceWorkflow } from "./get-custom-price";
-import { logger } from "@medusajs/framework";
 
 type CustomAddToCartWorkflowInput = {
   item: {
@@ -50,17 +49,11 @@ export const customAddToCartWorkflow = createWorkflow(
         price,
       },
       (data) => {
-        console.log("data", data);
-        console.log("price", data.price);
-        console.log(
-          "Math.round(Number(data.price))",
-          Math.round(Number(data.price))
-        );
         return {
           variant_id: data.item.variant_id,
           quantity: data.item.quantity || 1,
           metadata: data.item.metadata,
-          unit_price: Math.round(Number(data.price)),
+          unit_price: data.price,
         };
       }
     );
