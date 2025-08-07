@@ -304,6 +304,7 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
       }
       // Save sale prices to pricing system
       if (salePrices.length > 0) {
+        console.log("salePrices", JSON.stringify(salePrices, null, 2));
         await sdk.client.fetch(`/admin/pricing/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
