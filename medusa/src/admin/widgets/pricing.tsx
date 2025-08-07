@@ -285,9 +285,9 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
               min_quantity: minQty,
               max_quantity: maxQty,
               rules: {
-                region_id: regions.find(
+                /* region_id: regions.find(
                   (region) => region.currency_code === currencyCode
-                )?.id,
+                )?.id, */
               },
             });
 
