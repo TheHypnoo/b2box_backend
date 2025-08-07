@@ -292,13 +292,13 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
             });
 
             // Add price without rules (no region_id)
-            salePrices.push({
+            /* salePrices.push({
               amount: Number(salePrice.toFixed(2)),
               currency_code: currencyCode,
               min_quantity: minQty,
               max_quantity: maxQty,
               rules: {},
-            });
+            }); */
           }
         }
       }
