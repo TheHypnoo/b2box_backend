@@ -51,6 +51,9 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [ruleMode, setRuleMode] = useState<
+    "with-region" | "without-region" | "both"
+  >("with-region");
 
   // Añadir estados de error para los inputs
   const [inputErrors, setInputErrors] = useState({
@@ -95,8 +98,6 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         const regionsResponse = await sdk.admin.region.list();
 
         setRegions(regionsResponse.regions || []);
-
-        console.log("regionsResponse", regionsResponse);
 
         setCurrencies(storeResponse.stores?.[0]?.supported_currencies || []);
 
@@ -164,6 +165,8 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
       },
     }));
   };
+
+  // ruleMode determines how salePrices rules are built on save
 
   const updateMinQuantity = (tier: string, quantity: number | null) => {
     setInputErrors((prev) => ({
@@ -246,7 +249,7 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
         },
       });
       // Calculate and save sale prices
-      const salePrices = [];
+      const salePrices: any[] = [];
       for (const currency of currencies) {
         const currencyCode = currency.currency_code;
         const marginObj = formData.margins[currencyCode] || {};
@@ -278,33 +281,48 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
                   ] ?? 0) - 1 || null
                 : null;
 
-            // Add price with rules (region_id)
-            salePrices.push({
-              amount: Number(salePrice.toFixed(2)),
-              currency_code: currencyCode,
-              min_quantity: minQty,
-              max_quantity: maxQty,
-              rules: {
-                /* region_id: regions.find(
-                  (region) => region.currency_code === currencyCode
-                )?.id, */
-              },
-            });
+            const regionId = regions.find(
+              (region) => region.currency_code === currencyCode
+            )?.id;
 
-            // Add price without rules (no region_id)
-            /* salePrices.push({
-              amount: Number(salePrice.toFixed(2)),
-              currency_code: currencyCode,
-              min_quantity: minQty,
-              max_quantity: maxQty,
-              rules: {},
-            }); */
+            if (ruleMode === "with-region") {
+              salePrices.push({
+                amount: Number(salePrice.toFixed(2)),
+                currency_code: currencyCode,
+                min_quantity: minQty,
+                max_quantity: maxQty,
+                rules: regionId ? { region_id: regionId } : {},
+              });
+            } else if (ruleMode === "without-region") {
+              salePrices.push({
+                amount: Number(salePrice.toFixed(2)),
+                currency_code: currencyCode,
+                min_quantity: minQty,
+                max_quantity: maxQty,
+                rules: {},
+              });
+            } else if (ruleMode === "both") {
+              salePrices.push({
+                amount: Number(salePrice.toFixed(2)),
+                currency_code: currencyCode,
+                min_quantity: minQty,
+                max_quantity: maxQty,
+                rules: regionId ? { region_id: regionId } : {},
+              });
+              salePrices.push({
+                amount: Number(salePrice.toFixed(2)),
+                currency_code: currencyCode,
+                min_quantity: minQty,
+                max_quantity: maxQty,
+                rules: {},
+              });
+            }
           }
         }
       }
       // Save sale prices to pricing system
       if (salePrices.length > 0) {
-        console.log("salePrices", JSON.stringify(salePrices, null, 2));
+        console.log("salePrices (mode:", ruleMode, ")", salePrices);
         await sdk.client.fetch(`/admin/pricing/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -510,6 +528,39 @@ const PricingWidget = ({ data }: DetailWidgetProps<AdminProductVariant>) => {
             <Drawer.Title>Edit Pricing Configuration</Drawer.Title>
           </Drawer.Header>
           <Drawer.Body style={{ overflowY: "auto" }}>
+            <div className="mb-4">
+              <Heading level="h3" className="mb-2">
+                Rule mode
+              </Heading>
+              <div className="flex gap-2 items-center flex-wrap">
+                <Button
+                  type="button"
+                  size="small"
+                  variant={ruleMode === "with-region" ? "primary" : "secondary"}
+                  onClick={() => setRuleMode("with-region")}
+                >
+                  Con región
+                </Button>
+                <Button
+                  type="button"
+                  size="small"
+                  variant={
+                    ruleMode === "without-region" ? "primary" : "secondary"
+                  }
+                  onClick={() => setRuleMode("without-region")}
+                >
+                  Sin región
+                </Button>
+                <Button
+                  type="button"
+                  size="small"
+                  variant={ruleMode === "both" ? "primary" : "secondary"}
+                  onClick={() => setRuleMode("both")}
+                >
+                  Con y sin región
+                </Button>
+              </div>
+            </div>
             <form onSubmit={handleSubmit}>
               <div
                 style={{ display: "flex", flexDirection: "column", gap: 24 }}
